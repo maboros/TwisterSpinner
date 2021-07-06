@@ -162,25 +162,6 @@ void CMainFrame::OnViewCustomize()
 	pDlgCust->Create();
 }
 
-LRESULT CMainFrame::OnToolbarCreateNew(WPARAM wp,LPARAM lp)
-{
-	LRESULT lres = CFrameWndEx::OnToolbarCreateNew(wp,lp);
-	if (lres == 0)
-	{
-		return 0;
-	}
-
-	CMFCToolBar* pUserToolbar = (CMFCToolBar*)lres;
-	ASSERT_VALID(pUserToolbar);
-
-	BOOL bNameValid;
-	CString strCustomize;
-	bNameValid = strCustomize.LoadString(IDS_TOOLBAR_CUSTOMIZE);
-	ASSERT(bNameValid);
-
-	pUserToolbar->EnableCustomizeButton(TRUE, ID_VIEW_CUSTOMIZE, strCustomize);
-	return lres;
-}
 
 void CMainFrame::OnApplicationLook(UINT id)
 {
