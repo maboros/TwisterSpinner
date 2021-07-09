@@ -48,6 +48,7 @@ private:
 	CButton spinButton;
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };
 
 #ifndef _DEBUG  // debug version in TwisterSpinnerView.cpp

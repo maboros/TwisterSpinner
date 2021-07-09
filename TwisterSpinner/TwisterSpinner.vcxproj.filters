@@ -42,6 +42,9 @@
     <ClInclude Include="SpinButton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FlickerFree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TwisterSpinner.cpp">
