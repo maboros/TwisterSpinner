@@ -17,6 +17,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+#include <string>
 
 
 // CTwisterSpinnerView
@@ -75,21 +76,23 @@ void DrawArrow(CDC* pDC, CPoint center, double r) {
 	pDC->MoveTo(center);
 	pDC->LineTo(center.x + cos(spinAngle) * r, center.y + sin(spinAngle) * r);
 }
-
+double pi = 3.14159;
 void CTwisterSpinnerView::OnDraw(CDC* pDC)
 {
-	CPoint previous = CPoint(150, 200);
-	int midX = 150;
-	int midY = 150;
+	
+	CRect screen;
+	GetWindowRect(screen);
+	CPoint center = CPoint((screen.right - screen.left) / 2, (screen.bottom - screen.top) / 2);
+	double r = 200;
+	CPoint previous = CPoint(center.x, center.y+r);
+	//int midX = 150;
+	//int midY = 150;
 	CTwisterSpinnerDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
-		return;
-	
-	// TODO: add draw code for native data here
+		return;		
 		
-		double r=120;
-		double pi = 3.14159;
+		
 		int size=16;
 		pDC->MoveTo(previous);
 		FlickerFreeDC::CMemDC dc{ pDC };
@@ -110,12 +113,12 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 				break;
 			}
 			myBrush brush((HDC)dc, myCol);
-			double x =(double)midX+ cos(2.0 * (1.0+i) * pi / size)*r;
-			double y =(double)midY+ sin(2.0 * (1.0+i) * pi / size)*r;
-			dc.Pie(CRect(midX-r,midY-r,midX+r,midY+r), CPoint(x, y),previous);
+			double x =(double)center.x+ cos(2.0 * (1.0+i) * pi / size)*r;
+			double y =(double)center.y+ sin(2.0 * (1.0+i) * pi / size)*r;
+			dc.Pie(CRect(center.x-r,center.y-r,center.x+r,center.y+r), CPoint(x, y),previous);
 			previous=CPoint(x,y);
 		}
-		DrawArrow(dc, CPoint(midX, midY), r);
+		DrawArrow(dc, CPoint(center.x, center.y), r);
 }
 
 
@@ -134,23 +137,63 @@ void CTwisterSpinnerView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 
 UINT_PTR timerVal;
 bool timerLive;
+bool arrowSpun = false;
 double spinAmount=0;
 void CTwisterSpinnerView::OnSpinButtonClicked()
 {
-	timerVal = SetTimer(IDT_TIMER_0, 10, NULL);
+	timerVal = SetTimer(IDT_TIMER_0, 1, NULL);
 	if (timerVal == 0)
 	{
-		MessageBox(L"Timer dead", L"IDT_TIMER_0", MB_OK | MB_SYSTEMMODAL);
+		MessageBox(L"Timer failed to initialize", L"IDT_TIMER_0", MB_OK | MB_SYSTEMMODAL);
 	}
-	while (spinAngle > 6.28) {
-		spinAmount -= 6.28;
-		spinAngle -= 6.28;
+	while (spinAngle > 2*pi) {
+		spinAmount -= 2 * pi;
+		spinAngle -= 2 * pi;
 	}
-	spinAmount += (1 + (int)(5000.0 * rand() / (RAND_MAX + 1.0)))/100+6.28*2;
+	//spinAmount += (1 + (int)(500.0 * rand() / (RAND_MAX + 1.0)))/10+ 2 * pi;
+	srand(time(NULL));
+	spinAmount += 2*pi +(rand()) / (RAND_MAX / (2*pi*3 - 2*pi));
 	timerLive = true;
+	arrowSpun = true;
 	return;
 }
-
+void CTwisterSpinnerView::DisplayLimbAndColor() {
+	CString limbAndColor;
+	if (cos(spinAngle) < 0) {
+		limbAndColor.Append(L"Left ");
+	}
+	else {
+		limbAndColor.Append(L"Right ");
+	}
+	if (sin(spinAngle) <= 0) {
+		limbAndColor.Append(L"hand ");
+	}
+	else {
+		limbAndColor.Append(L"leg ");
+	}
+	double angleDeg = (spinAngle*180) / pi;
+	while (angleDeg > 90) {
+		angleDeg -= 90;
+	}
+	if (angleDeg >= 3 * 22.5)
+	{
+		limbAndColor.Append(L"yellow");
+	}
+	else if (angleDeg >= 2 * 22.5)
+	{
+		limbAndColor.Append(L"blue");
+	}
+	else if (angleDeg >= 22.5)
+	{
+		limbAndColor.Append(L"green");
+	}
+	else
+	{
+		limbAndColor.Append(L"red");
+	}
+	MessageBox((LPCTSTR)limbAndColor, L"You spun", MB_OK);
+	arrowSpun = false;
+}
 void CTwisterSpinnerView::OnTimer(UINT_PTR TimerVal)
 {
 	if (spinAngle /spinAmount < 0.66&&spinAngle/spinAmount>0.33)
@@ -167,6 +210,10 @@ void CTwisterSpinnerView::OnTimer(UINT_PTR TimerVal)
 	}
 	if (spinAngle > spinAmount)
 	{
+		if (arrowSpun) {
+			arrowSpun = false;
+			DisplayLimbAndColor();
+		}
 		KillTimer(timerVal);
 		timerLive = false;
 	}
@@ -204,7 +251,6 @@ int CTwisterSpinnerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
-
 	spinButton.Create(_T("Spin!"), BS_PUSHBUTTON, CRect(300, 100, 400, 150),this,IDC_SPINBUTTON);
 	spinButton.ShowWindow(SW_SHOW);
 	return 0;

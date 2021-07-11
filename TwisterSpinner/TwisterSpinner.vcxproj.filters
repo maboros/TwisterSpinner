@@ -72,13 +72,7 @@
     <Image Include="res\TwisterSpinnerDoc.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\TwisterSpinner.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\Toolbar.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\Toolbar256.bmp">
+    <Image Include="..\..\..\..\Downloads\Twister_Spinner.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

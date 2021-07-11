@@ -210,9 +210,7 @@
     <ResourceCompile Include="TwisterSpinner.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\Toolbar.bmp" />
-    <Image Include="res\Toolbar256.bmp" />
-    <Image Include="res\TwisterSpinner.ico" />
+    <Image Include="..\..\..\..\Downloads\Twister_Spinner.ico" />
     <Image Include="res\TwisterSpinnerDoc.ico" />
   </ItemGroup>
   <ItemGroup>
