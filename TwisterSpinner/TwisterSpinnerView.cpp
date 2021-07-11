@@ -67,26 +67,30 @@ BOOL CTwisterSpinnerView::PreCreateWindow(CREATESTRUCT& cs)
 	return CView::PreCreateWindow(cs);
 }
 
-// CTwisterSpinnerView drawing
 double spinAngle = 0;
 
 void DrawArrow(CDC* pDC, CPoint center, double r) {
-	CPen drawPen(PS_SOLID, 3/*thickness*/, RGB(0,0,0));
-	pDC->SelectObject(&drawPen);
-	pDC->MoveTo(center);
-	pDC->LineTo(center.x + cos(spinAngle) * r, center.y + sin(spinAngle) * r);
+	
 }
 double pi = 3.14159;
 void CTwisterSpinnerView::OnDraw(CDC* pDC)
 {
-	
+
+	pDC->SetBkColor(RGB(200, 200, 200));
 	CRect screen;
 	GetWindowRect(screen);
 	CPoint center = CPoint((screen.right - screen.left) / 2, (screen.bottom - screen.top) / 2);
 	double r = 200;
+	GetDlgItem(IDC_SPINBUTTON)->MoveWindow(center.x-50, center.y + r * 1.1, 100, 50);
 	CPoint previous = CPoint(center.x, center.y+r);
-	//int midX = 150;
-	//int midY = 150;
+	pDC->MoveTo(previous);
+	FlickerFreeDC::CMemDC dc{ pDC };
+	dc.DrawText(L"Left hand", CRect(center.x - r-20, center.y - r, center.x - r + 50, center.x - r + 20), DT_SINGLELINE|DT_LEFT);
+	dc.DrawText(L"Right hand", CRect(center.x + r - 20, center.y - r, center.x + r + 50, center.x - r + 20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(L"Left leg", CRect(center.x - r - 20, center.y + r, center.x - r + 50, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(L"Right leg", CRect(center.x + r - 20, center.y + r, center.x + r + 50, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
+
+
 	CTwisterSpinnerDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
@@ -94,8 +98,12 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 		
 		
 		int size=16;
-		pDC->MoveTo(previous);
-		FlickerFreeDC::CMemDC dc{ pDC };
+		
+		CPen thickPen(PS_SOLID, 5, RGB(0, 0, 0));
+		dc.SelectObject(&thickPen);
+		dc.Ellipse(center.x - r, center.y - r, center.x + r, center.y + r);
+		CPen thinPen(PS_SOLID, 1, RGB(0, 0, 0));
+		dc.SelectObject(&thinPen);
 		for (int i = 0; i <= size; i++) {
 			COLORREF myCol;
 			switch (i % 4) {
@@ -115,8 +123,18 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 			myBrush brush((HDC)dc, myCol);
 			double x =(double)center.x+ cos(2.0 * (1.0+i) * pi / size)*r;
 			double y =(double)center.y+ sin(2.0 * (1.0+i) * pi / size)*r;
+			
+			
 			dc.Pie(CRect(center.x-r,center.y-r,center.x+r,center.y+r), CPoint(x, y),previous);
 			previous=CPoint(x,y);
+		}
+		{
+			CPen drawPen(PS_SOLID, 3, RGB(0, 0, 0));
+			r = r * 0.9;
+			dc.SelectObject(&drawPen);
+			dc.MoveTo(center);
+			dc.LineTo(center.x + cos(spinAngle) * r, center.y + sin(spinAngle) * r);
+			dc.Ellipse(center.x + cos(spinAngle) * r - 2, center.y + sin(spinAngle) * r - 2, center.x + cos(spinAngle) * r + 2, center.y + sin(spinAngle) * r + 2);
 		}
 		DrawArrow(dc, CPoint(center.x, center.y), r);
 }
@@ -138,7 +156,7 @@ void CTwisterSpinnerView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 UINT_PTR timerVal;
 bool timerLive;
 bool arrowSpun = false;
-double spinAmount=0;
+double spinAmount;
 void CTwisterSpinnerView::OnSpinButtonClicked()
 {
 	timerVal = SetTimer(IDT_TIMER_0, 1, NULL);
@@ -152,7 +170,7 @@ void CTwisterSpinnerView::OnSpinButtonClicked()
 	}
 	//spinAmount += (1 + (int)(500.0 * rand() / (RAND_MAX + 1.0)))/10+ 2 * pi;
 	srand(time(NULL));
-	spinAmount += 2*pi +(rand()) / (RAND_MAX / (2*pi*3 - 2*pi));
+	spinAmount += 4*pi +(rand()) / (RAND_MAX / (2*pi*6 - 4*pi));
 	timerLive = true;
 	arrowSpun = true;
 	return;
@@ -251,8 +269,12 @@ int CTwisterSpinnerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
+	srand(time(NULL));
+	spinAmount=(rand()) / (RAND_MAX / (2 * pi));
+	spinAngle = (rand()) / (RAND_MAX / (2 * pi));
 	spinButton.Create(_T("Spin!"), BS_PUSHBUTTON, CRect(300, 100, 400, 150),this,IDC_SPINBUTTON);
 	spinButton.ShowWindow(SW_SHOW);
+
 	return 0;
 }
 
