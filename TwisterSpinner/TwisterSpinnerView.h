@@ -24,6 +24,7 @@ public:
 // Overrides
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
+	void DisplayLimbAndColor();
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
 

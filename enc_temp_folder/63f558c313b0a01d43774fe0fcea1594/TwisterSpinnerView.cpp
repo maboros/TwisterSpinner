@@ -251,6 +251,9 @@ int CTwisterSpinnerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
+	CRect screen;
+	GetWindowRect(screen);
+	CPoint center = CPoint((screen.right - screen.left) / 2, (screen.bottom - screen.top) / 2);
 	spinButton.Create(_T("Spin!"), BS_PUSHBUTTON, CRect(300, 100, 400, 150),this,IDC_SPINBUTTON);
 	spinButton.ShowWindow(SW_SHOW);
 	return 0;
