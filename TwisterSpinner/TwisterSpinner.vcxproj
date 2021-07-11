@@ -211,6 +211,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\Downloads\Twister_Spinner.ico" />
+    <Image Include="res\TwisterSpinner.ico" />
     <Image Include="res\TwisterSpinnerDoc.ico" />
   </ItemGroup>
   <ItemGroup>
