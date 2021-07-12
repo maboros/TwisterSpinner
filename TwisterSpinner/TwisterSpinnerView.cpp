@@ -29,6 +29,9 @@ BEGIN_MESSAGE_MAP(CTwisterSpinnerView, CView)
 	ON_WM_RBUTTONUP()
 	ON_WM_CREATE()
 	ON_BN_CLICKED(IDC_SPINBUTTON,OnSpinButtonClicked)
+	ON_BN_CLICKED(IDC_ADDBUTTON,OnAddButtonClicked)
+	ON_BN_CLICKED(IDC_REMOVEBUTTON, OnRemoveButtonClicked)
+	ON_BN_CLICKED(IDC_NEWGAMEBUTTON, OnNewGameButtonClicked)
 	ON_WM_TIMER()
 	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
@@ -64,10 +67,7 @@ BOOL CTwisterSpinnerView::PreCreateWindow(CREATESTRUCT& cs)
 }
 
 double spinAngle = 0;
-
-void DrawArrow(CDC* pDC, CPoint center, double r) {
-	
-}
+bool listBoxMoved = false;
 double pi = 3.14159;
 void CTwisterSpinnerView::OnDraw(CDC* pDC)
 {
@@ -78,6 +78,15 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 	CPoint center = CPoint((screen.right - screen.left) / 2, (screen.bottom - screen.top) / 2);
 	double r = 200;
 	GetDlgItem(IDC_SPINBUTTON)->MoveWindow(center.x-50, center.y + r * 1.1, 100, 50);
+	GetDlgItem(IDC_NEWGAMEBUTTON)->MoveWindow(center.x + r+50, center.y -25, 150,50);
+	if (!listBoxMoved) {
+		GetDlgItem(IDC_LISTBOX)->MoveWindow(center.x - r - 250, center.y - r, 220, 400, false);
+		listBoxMoved = true;
+	}
+	GetDlgItem(IDC_TEXTBOX)->MoveWindow(center.x - r - 250, center.y - r-60,220,50);
+	GetDlgItem(IDC_ADDBUTTON)->MoveWindow(center.x - r - 250, center.y +r+20, 100,50);
+	GetDlgItem(IDC_REMOVEBUTTON)->MoveWindow(center.x - r - 140, center.y +r+20, 110, 50);
+
 	CPoint previous = CPoint(center.x, center.y+r);
 	pDC->MoveTo(previous);
 	FlickerFreeDC::CMemDC dc{ pDC };
@@ -132,7 +141,6 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 			dc.LineTo(center.x + cos(spinAngle) * r, center.y + sin(spinAngle) * r);
 			dc.Ellipse(center.x + cos(spinAngle) * r - 2, center.y + sin(spinAngle) * r - 2, center.x + cos(spinAngle) * r + 2, center.y + sin(spinAngle) * r + 2);
 		}
-		DrawArrow(dc, CPoint(center.x, center.y), r);
 }
 
 
@@ -169,7 +177,27 @@ void CTwisterSpinnerView::OnSpinButtonClicked()
 	spinAmount += 4*pi +(rand()) / (RAND_MAX / (2*pi*6 - 4*pi));
 	timerLive = true;
 	arrowSpun = true;
+	newGameButton.EnableWindow(false);
+	addButton.EnableWindow(false);
+	removeButton.EnableWindow(false);
+	spinButton.EnableWindow(false);
 	return;
+}
+void CTwisterSpinnerView::OnAddButtonClicked()
+{
+	//textBox.gettext
+	listBox.AddString(L"Someting");
+}
+void CTwisterSpinnerView::OnRemoveButtonClicked()
+{
+	listBox.DeleteString(0);
+}
+void CTwisterSpinnerView::OnNewGameButtonClicked()
+{
+	while (listBox.GetCount() > 0) {
+		listBox.DeleteString(0);
+	}
+	
 }
 void CTwisterSpinnerView::DisplayLimbAndColor() {
 	CString limbAndColor;
@@ -206,6 +234,10 @@ void CTwisterSpinnerView::DisplayLimbAndColor() {
 		limbAndColor.Append(L"red");
 	}
 	MessageBox((LPCTSTR)limbAndColor, L"You spun", MB_OK);
+	newGameButton.EnableWindow(true);
+	addButton.EnableWindow(true);
+	removeButton.EnableWindow(true);
+	spinButton.EnableWindow(true);
 	arrowSpun = false;
 }
 void CTwisterSpinnerView::OnTimer(UINT_PTR TimerVal)
@@ -237,7 +269,6 @@ void CTwisterSpinnerView::OnTimer(UINT_PTR TimerVal)
 }
 
 
-// CTwisterSpinnerView diagnostics
 
 #ifdef _DEBUG
 void CTwisterSpinnerView::AssertValid() const
@@ -265,12 +296,23 @@ int CTwisterSpinnerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
+
 	srand(time(NULL));
 	spinAmount=(rand()) / (RAND_MAX / (2 * pi));
 	spinAngle = (rand()) / (RAND_MAX / (2 * pi));
+
+
 	spinButton.Create(_T("Spin!"), BS_PUSHBUTTON, CRect(300, 100, 400, 150),this,IDC_SPINBUTTON);
 	spinButton.ShowWindow(SW_SHOW);
+	addButton.Create(_T("Add player"), BS_PUSHBUTTON, CRect(300, 100, 400, 150), this, IDC_ADDBUTTON);
+	addButton.ShowWindow(SW_SHOW);
+	removeButton.Create(_T("Remove player"), BS_PUSHBUTTON, CRect(300, 100, 400, 150), this, IDC_REMOVEBUTTON);
+	removeButton.ShowWindow(SW_SHOW);
+	newGameButton.Create(_T("Start new game"), BS_PUSHBUTTON, CRect(300, 100, 400, 150), this, IDC_NEWGAMEBUTTON);
+	newGameButton.ShowWindow(SW_SHOW);
 
+	textBox.Create(WS_CHILD | WS_VISIBLE|WS_BORDER, CRect(100, 100, 200, 500), this, IDC_TEXTBOX);
+	listBox.Create(WS_CHILD | WS_VISIBLE|WS_BORDER,CRect(100,100,200,500),this,IDC_LISTBOX);
 	return 0;
 }
 
@@ -278,4 +320,13 @@ int CTwisterSpinnerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 BOOL CTwisterSpinnerView::OnEraseBkgnd(CDC* pDC)
 {
 	return false;
+}
+
+
+BOOL CTwisterSpinnerView::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+{
+	if (message == WM_SIZE) {
+		listBoxMoved = false;
+	}
+	return CView::OnWndMsg(message, wParam, lParam, pResult);
 }

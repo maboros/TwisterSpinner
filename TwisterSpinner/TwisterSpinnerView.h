@@ -5,6 +5,12 @@
 #pragma once
 #define	IDT_TIMER_0	WM_USER + 200
 constexpr UINT IDC_SPINBUTTON(101);
+constexpr UINT IDC_ADDBUTTON(IDC_SPINBUTTON+1);
+constexpr UINT IDC_REMOVEBUTTON(IDC_SPINBUTTON+2);
+constexpr UINT IDC_NEWGAMEBUTTON(IDC_SPINBUTTON + 3);
+constexpr UINT IDC_LISTBOX(IDC_SPINBUTTON+4);
+constexpr UINT IDC_TEXTBOX(IDC_SPINBUTTON + 5);
+
 
 
 
@@ -43,13 +49,22 @@ protected:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnSpinButtonClicked();
+	afx_msg void OnAddButtonClicked();
+	afx_msg void OnRemoveButtonClicked();
+	afx_msg void OnNewGameButtonClicked();
 	afx_msg void OnTimer(UINT_PTR TimerVal);
 	DECLARE_MESSAGE_MAP()
 private:
 	CButton spinButton;
+	CButton addButton;
+	CButton removeButton;
+	CButton newGameButton;
+	CEdit textBox;
+	CListBox listBox;
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 };
 
 #ifndef _DEBUG  // debug version in TwisterSpinnerView.cpp
