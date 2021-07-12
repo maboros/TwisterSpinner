@@ -54,7 +54,11 @@ public:
 
 CTwisterSpinnerView::CTwisterSpinnerView() noexcept
 {
+}
 
+void CTwisterSpinnerView::Reset()
+{
+	OnNewGameButtonClicked();
 }
 
 CTwisterSpinnerView::~CTwisterSpinnerView()
@@ -66,9 +70,7 @@ BOOL CTwisterSpinnerView::PreCreateWindow(CREATESTRUCT& cs)
 	return CView::PreCreateWindow(cs);
 }
 
-double spinAngle = 0;
-bool listBoxMoved = false;
-double pi = 3.14159;
+
 void CTwisterSpinnerView::OnDraw(CDC* pDC)
 {
 
@@ -76,7 +78,6 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 	CRect screen;
 	GetWindowRect(screen);
 	CPoint center = CPoint((screen.right - screen.left) / 2, (screen.bottom - screen.top) / 2);
-	double r = 200;
 	GetDlgItem(IDC_SPINBUTTON)->MoveWindow(center.x-50, center.y + r * 1.1, 100, 50);
 	GetDlgItem(IDC_NEWGAMEBUTTON)->MoveWindow(center.x + r+50, center.y -25, 150,50);
 	if (!listBoxMoved) {
@@ -90,11 +91,34 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 	CPoint previous = CPoint(center.x, center.y+r);
 	pDC->MoveTo(previous);
 	FlickerFreeDC::CMemDC dc{ pDC };
+	
+	dc.DrawText(L"Players:", CRect(center.x - r - 320, center.y - r, center.x - r - 250, center.y - r+20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(L"Add new players:", CRect(center.x - r - 370, center.y - r-60, center.x - r - 250, center.y - r -40), DT_SINGLELINE | DT_LEFT);
 	dc.DrawText(L"Left hand", CRect(center.x - r-20, center.y - r, center.x - r + 50, center.x - r + 20), DT_SINGLELINE|DT_LEFT);
 	dc.DrawText(L"Right hand", CRect(center.x + r - 20, center.y - r, center.x + r + 50, center.x - r + 20), DT_SINGLELINE | DT_LEFT);
 	dc.DrawText(L"Left leg", CRect(center.x - r - 20, center.y + r, center.x - r + 50, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
 	dc.DrawText(L"Right leg", CRect(center.x + r - 20, center.y + r, center.x + r + 50, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
+	CFont font;
+	font.CreateFont(
+		28,                       // nHeight
+		0,                        // nWidth
+		0,                        // nEscapement
+		0,                        // nOrientation
+		FW_SEMIBOLD,                // nWeight
+		FALSE,                    // bItalic
+		FALSE,                    // bUnderline
+		0,                        // cStrikeOut
+		ANSI_CHARSET,             // nCharSet
+		OUT_DEFAULT_PRECIS,       // nOutPrecision
+		CLIP_DEFAULT_PRECIS,      // nClipPrecision
+		DEFAULT_QUALITY,          // nQuality
+		DEFAULT_PITCH | FF_MODERN, // nPitchAndFamily
+		_T("Comic Sans"));            // lpszFacename
 
+	CFont* def_font = dc.SelectObject(&font);
+	dc.DrawText(L"Welcome to TwisterSpinner", CRect(center.x - 200, center.y - r - 70, center.x + 200, center.x - r - 50), DT_SINGLELINE | DT_CENTER);
+	dc.SelectObject(def_font);
+	font.DeleteObject();
 
 	CTwisterSpinnerDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
@@ -135,11 +159,11 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 		}
 		{
 			CPen drawPen(PS_SOLID, 3, RGB(0, 0, 0));
-			r = r * 0.9;
+			double arrowR = r * 0.9;
 			dc.SelectObject(&drawPen);
 			dc.MoveTo(center);
-			dc.LineTo(center.x + cos(spinAngle) * r, center.y + sin(spinAngle) * r);
-			dc.Ellipse(center.x + cos(spinAngle) * r - 2, center.y + sin(spinAngle) * r - 2, center.x + cos(spinAngle) * r + 2, center.y + sin(spinAngle) * r + 2);
+			dc.LineTo(center.x + cos(spinAngle) * arrowR, center.y + sin(spinAngle) * arrowR);
+			dc.Ellipse(center.x + cos(spinAngle) * arrowR - 2, center.y + sin(spinAngle) * arrowR - 2, center.x + cos(spinAngle) * arrowR + 2, center.y + sin(spinAngle) * arrowR + 2);
 		}
 }
 
@@ -157,10 +181,7 @@ void CTwisterSpinnerView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 #endif
 }
 
-UINT_PTR timerVal;
-bool timerLive;
-bool arrowSpun = false;
-double spinAmount;
+
 void CTwisterSpinnerView::OnSpinButtonClicked()
 {
 	timerVal = SetTimer(IDT_TIMER_0, 1, NULL);
@@ -185,19 +206,31 @@ void CTwisterSpinnerView::OnSpinButtonClicked()
 }
 void CTwisterSpinnerView::OnAddButtonClicked()
 {
-	//textBox.gettext
-	listBox.AddString(L"Someting");
+	CString name;
+	textBox.GetWindowTextW(name);
+	if (name.IsEmpty()) {
+		return;
+	}
+	textBox.SetWindowTextW(L"");
+	listBox.AddString(name);
 }
 void CTwisterSpinnerView::OnRemoveButtonClicked()
 {
-	listBox.DeleteString(0);
+	listBox.DeleteString(listBox.GetCurSel());
+	if (listBox.GetCount() == 1) {
+		CString winner;
+		listBox.GetText(0, winner);
+		winner.Append(L" wins!");
+		MessageBox(winner, L"Congratulations", MB_OK);
+	}
 }
 void CTwisterSpinnerView::OnNewGameButtonClicked()
 {
 	while (listBox.GetCount() > 0) {
 		listBox.DeleteString(0);
 	}
-	
+	spinAmount = (rand()) / (RAND_MAX / (2 * pi));
+	spinAngle = (rand()) / (RAND_MAX / (2 * pi));
 }
 void CTwisterSpinnerView::DisplayLimbAndColor() {
 	CString limbAndColor;
@@ -321,12 +354,22 @@ BOOL CTwisterSpinnerView::OnEraseBkgnd(CDC* pDC)
 {
 	return false;
 }
-
+void CTwisterSpinnerView::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
+{
+		// Adjust the minimum height and width, if needed
+		lpMMI->ptMinTrackSize.x = 1000;
+		lpMMI->ptMinTrackSize.y = 1000;
+		// Adjust the maximum height and width, if necessary
+		lpMMI->ptMaxTrackSize.x = 1000;
+		lpMMI->ptMaxTrackSize.y = 1000;
+		CView::OnGetMinMaxInfo(lpMMI);
+}
 
 BOOL CTwisterSpinnerView::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
 	if (message == WM_SIZE) {
 		listBoxMoved = false;
 	}
+
 	return CView::OnWndMsg(message, wParam, lParam, pResult);
 }

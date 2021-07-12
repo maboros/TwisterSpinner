@@ -5,7 +5,7 @@
 #include "pch.h"
 #include "framework.h"
 #include "TwisterSpinner.h"
-
+#include "TwisterSpinnerView.h"
 #include "MainFrm.h"
 
 #ifdef _DEBUG
@@ -26,6 +26,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_REGISTERED_MESSAGE(AFX_WM_CREATETOOLBAR, &CMainFrame::OnToolbarCreateNew)
 	ON_COMMAND_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnApplicationLook)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnUpdateApplicationLook)
+	ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -267,3 +268,19 @@ BOOL CMainFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle, CWnd* pParent
 	return TRUE;
 }
 
+
+
+void CMainFrame::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
+{
+
+	int r = 400;
+	// Adjust the minimum height and width, if needed
+	lpMMI->ptMinTrackSize.x =r*3;
+	lpMMI->ptMinTrackSize.y = r*2;
+	// Adjust the maximum height and width, if necessary
+	lpMMI->ptMaxTrackSize.x = r*3;
+	lpMMI->ptMaxTrackSize.y = r*2;
+
+
+	CFrameWndEx::OnGetMinMaxInfo(lpMMI);
+}

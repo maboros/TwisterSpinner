@@ -3,12 +3,13 @@
 //
 
 #pragma once
+#include "TwisterSpinnerDoc.h"
 #define	IDT_TIMER_0	WM_USER + 200
 constexpr UINT IDC_SPINBUTTON(101);
-constexpr UINT IDC_ADDBUTTON(IDC_SPINBUTTON+1);
-constexpr UINT IDC_REMOVEBUTTON(IDC_SPINBUTTON+2);
+constexpr UINT IDC_ADDBUTTON(IDC_SPINBUTTON + 1);
+constexpr UINT IDC_REMOVEBUTTON(IDC_SPINBUTTON + 2);
 constexpr UINT IDC_NEWGAMEBUTTON(IDC_SPINBUTTON + 3);
-constexpr UINT IDC_LISTBOX(IDC_SPINBUTTON+4);
+constexpr UINT IDC_LISTBOX(IDC_SPINBUTTON + 4);
 constexpr UINT IDC_TEXTBOX(IDC_SPINBUTTON + 5);
 
 
@@ -20,7 +21,7 @@ protected: // create from serialization only
 	CTwisterSpinnerView() noexcept;
 	DECLARE_DYNCREATE(CTwisterSpinnerView)
 
-// Attributes
+	// Attributes
 public:
 	CTwisterSpinnerDoc* GetDocument() const;
 
@@ -33,6 +34,16 @@ public:
 	void DisplayLimbAndColor();
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
+	UINT_PTR timerVal;
+	bool timerLive;
+	bool arrowSpun = false;
+	double spinAmount;
+	double spinAngle = 0;
+	bool listBoxMoved = false;
+	double pi = 3.14159;
+public:
+	void Reset();
+	double r = 200;
 
 // Implementation
 public:
@@ -43,7 +54,7 @@ public:
 #endif
 
 protected:
-
+	void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 // Generated message map functions
 protected:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
