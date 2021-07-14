@@ -28,6 +28,19 @@
 #define ID_VIEW_APPLOOK_OFF_2007_AQUA   218
 #define ID_VIEW_APPLOOK_WINDOWS_7       219
 #define IDS_EDIT_MENU                   306
+#define IDT_TIMER_0                     400
+#define IDC_SPINBUTTON                  401
+#define IDC_ADDBUTTON                   402
+#define IDC_REMOVEBUTTON                403
+#define IDC_NEWGAMEBUTTON               404
+#define IDC_TEXTBOX                     405
+#define IDC_LISTBOX                     406
+#define IDS_PLAYERSTRING                1000
+#define IDS_LEFT_HAND                   1001
+#define IDS_RIGHT_HAND                  1002
+#define IDS_LEFT_LEG                    1003
+#define IDS_RIGHT_LEG                   1004
+#define IDS_ADD_NEW_PLAYER              1005
 
 // Next default values for new objects
 // 

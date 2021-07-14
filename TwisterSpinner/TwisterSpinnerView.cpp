@@ -13,7 +13,9 @@
 #include "TwisterSpinnerDoc.h"
 #include "TwisterSpinnerView.h"
 #include "FlickerFree.h"
-
+#include "resource.h"
+#define M_PI   3.14159265358979323846264338327950288
+#include<random>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -38,22 +40,10 @@ END_MESSAGE_MAP()
 
 // CTwisterSpinnerView construction/destruction
 
-class myBrush {
-	HDC hdc;
-	HBRUSH brush;
-public:
-	myBrush(HDC hdc, COLORREF color) {
-		this->hdc = hdc;
-		this->brush = CreateSolidBrush(color);
-		SelectObject(hdc, brush);
-	}
-	~myBrush() {
-		DeleteObject(SelectObject(hdc, brush));
-	}
-};
 
 CTwisterSpinnerView::CTwisterSpinnerView() noexcept
 {
+	spinAmount = 0;
 }
 
 void CTwisterSpinnerView::Reset()
@@ -70,7 +60,22 @@ BOOL CTwisterSpinnerView::PreCreateWindow(CREATESTRUCT& cs)
 	return CView::PreCreateWindow(cs);
 }
 
-
+COLORREF giveColor(int i){
+	switch (i % 4) {
+	case 0:
+		return  RGB(255, 0, 0);
+		break;
+	case 1:
+		return  RGB(0, 255, 0);
+		break;
+	case 2:
+		return  RGB(0, 0, 255);
+		break;
+	default:
+		return  RGB(255, 255, 0);
+		break;
+	}
+}
 void CTwisterSpinnerView::OnDraw(CDC* pDC)
 {
 
@@ -78,27 +83,23 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 	CRect screen;
 	GetWindowRect(screen);
 	CPoint center = CPoint((screen.right - screen.left) / 2, (screen.bottom - screen.top) / 2);
-	GetDlgItem(IDC_SPINBUTTON)->MoveWindow(center.x-50, center.y + r * 1.1, 100, 50);
-	GetDlgItem(IDC_NEWGAMEBUTTON)->MoveWindow(center.x + r+50, center.y -25, 150,50);
-	if (!listBoxMoved) {
-		GetDlgItem(IDC_LISTBOX)->MoveWindow(center.x - r - 250, center.y - r, 220, 400, false);
-		listBoxMoved = true;
-	}
-	GetDlgItem(IDC_TEXTBOX)->MoveWindow(center.x - r - 250, center.y - r-60,220,50);
-	GetDlgItem(IDC_ADDBUTTON)->MoveWindow(center.x - r - 250, center.y +r+20, 100,50);
-	GetDlgItem(IDC_REMOVEBUTTON)->MoveWindow(center.x - r - 140, center.y +r+20, 110, 50);
-
 	CPoint previous = CPoint(center.x, center.y+r);
 	pDC->MoveTo(previous);
 	FlickerFreeDC::CMemDC dc{ pDC };
-	
-	dc.DrawText(L"Players:", CRect(center.x - r - 320, center.y - r, center.x - r - 250, center.y - r+20), DT_SINGLELINE | DT_LEFT);
-	dc.DrawText(L"Add new players:", CRect(center.x - r - 370, center.y - r-60, center.x - r - 250, center.y - r -40), DT_SINGLELINE | DT_LEFT);
-	dc.DrawText(L"Left hand", CRect(center.x - r-20, center.y - r, center.x - r + 50, center.x - r + 20), DT_SINGLELINE|DT_LEFT);
-	dc.DrawText(L"Right hand", CRect(center.x + r - 20, center.y - r, center.x + r + 50, center.x - r + 20), DT_SINGLELINE | DT_LEFT);
-	dc.DrawText(L"Left leg", CRect(center.x - r - 20, center.y + r, center.x - r + 50, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
-	dc.DrawText(L"Right leg", CRect(center.x + r - 20, center.y + r, center.x + r + 50, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
+	CString stringFetcher[6];
+	for (int i = 0; i < 6; ++i)
+	{
+		stringFetcher[i].LoadString(IDS_PLAYERSTRING+i);
+	}
+	dc.DrawText(stringFetcher[0], CRect(center.x - r - 320, center.y - r, center.x - r - 250, center.y - r + 20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(stringFetcher[1], CRect(center.x - r-20, center.y - r, center.x - r + 50, center.x - r + 20), DT_SINGLELINE|DT_LEFT);
+	dc.DrawText(stringFetcher[2], CRect(center.x + r - 20, center.y - r, center.x + r + 50, center.x - r + 20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(stringFetcher[3], CRect(center.x - r - 20, center.y + r, center.x - r + 50, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(stringFetcher[4], CRect(center.x + r - 20, center.y + r, center.x + r + 50, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(stringFetcher[5], CRect(center.x - r - 370, center.y - r - 60, center.x - r - 250, center.y - r - 40), DT_SINGLELINE | DT_LEFT);
 	CFont font;
+
+	//TODO:: calculate font, add players turn, remove adding during game, fit all texts
 	font.CreateFont(
 		28,                       // nHeight
 		0,                        // nWidth
@@ -115,56 +116,36 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 		DEFAULT_PITCH | FF_MODERN, // nPitchAndFamily
 		_T("Comic Sans"));            // lpszFacename
 
-	CFont* def_font = dc.SelectObject(&font);
+	dc.SelectObject(&font);
 	dc.DrawText(L"Welcome to TwisterSpinner", CRect(center.x - 200, center.y - r - 70, center.x + 200, center.x - r - 50), DT_SINGLELINE | DT_CENTER);
-	dc.SelectObject(def_font);
-	font.DeleteObject();
-
 	CTwisterSpinnerDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return;		
-		
-		
 		int size=16;
-		
 		CPen thickPen(PS_SOLID, 5, RGB(0, 0, 0));
 		dc.SelectObject(&thickPen);
 		dc.Ellipse(center.x - r, center.y - r, center.x + r, center.y + r);
 		CPen thinPen(PS_SOLID, 1, RGB(0, 0, 0));
 		dc.SelectObject(&thinPen);
 		for (int i = 0; i <= size; i++) {
-			COLORREF myCol;
-			switch (i % 4) {
-			case 0:
-				myCol =RGB(255, 0, 0);
-				break;
-			case 1:
-				myCol = RGB(0, 255, 0);
-				break;
-			case 2:
-				myCol = RGB(0, 0, 255);
-				break;
-			default:
-				myCol = RGB(255, 255, 0);
-				break;
-			}
-			myBrush brush((HDC)dc, myCol);
-			double x =(double)center.x+ cos(2.0 * (1.0+i) * pi / size)*r;
-			double y =(double)center.y+ sin(2.0 * (1.0+i) * pi / size)*r;
+			COLORREF myCol=giveColor(i);
+			CBrush coloredBrush(myCol);
+			dc.SelectObject(coloredBrush);
+			double x =(double)center.x+ cos(2.0 * (1.0+i) * M_PI / size)*r;
+			double y =(double)center.y+ sin(2.0 * (1.0+i) * M_PI / size)*r;
 			
 			
 			dc.Pie(CRect(center.x-r,center.y-r,center.x+r,center.y+r), CPoint(x, y),previous);
 			previous=CPoint(x,y);
 		}
-		{
-			CPen drawPen(PS_SOLID, 3, RGB(0, 0, 0));
-			double arrowR = r * 0.9;
-			dc.SelectObject(&drawPen);
-			dc.MoveTo(center);
-			dc.LineTo(center.x + cos(spinAngle) * arrowR, center.y + sin(spinAngle) * arrowR);
-			dc.Ellipse(center.x + cos(spinAngle) * arrowR - 2, center.y + sin(spinAngle) * arrowR - 2, center.x + cos(spinAngle) * arrowR + 2, center.y + sin(spinAngle) * arrowR + 2);
-		}
+		CPen drawPen(PS_SOLID, 3, RGB(0, 0, 0));
+		double arrowR = r * 0.9;
+		dc.SelectObject(&drawPen);
+		dc.MoveTo(center);
+		dc.LineTo(center.x + cos(spinAngle) * arrowR, center.y + sin(spinAngle) * arrowR);
+		dc.Ellipse(center.x + cos(spinAngle) * arrowR - 2, center.y + sin(spinAngle) * arrowR - 2, center.x + cos(spinAngle) * arrowR + 2, center.y + sin(spinAngle) * arrowR + 2);
+		
 }
 
 
@@ -181,7 +162,8 @@ void CTwisterSpinnerView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 #endif
 }
 
-
+	std::random_device rd;
+	std::mt19937 mt(rd());
 void CTwisterSpinnerView::OnSpinButtonClicked()
 {
 	timerVal = SetTimer(IDT_TIMER_0, 1, NULL);
@@ -189,14 +171,13 @@ void CTwisterSpinnerView::OnSpinButtonClicked()
 	{
 		MessageBox(L"Timer failed to initialize", L"IDT_TIMER_0", MB_OK | MB_SYSTEMMODAL);
 	}
-	while (spinAngle > 2*pi) {
-		spinAmount -= 2 * pi;
-		spinAngle -= 2 * pi;
+	while (spinAngle > 2*M_PI) {
+		spinAmount -= 2 * M_PI;
+		spinAngle -= 2 * M_PI;
 	}
 	//spinAmount += (1 + (int)(500.0 * rand() / (RAND_MAX + 1.0)))/10+ 2 * pi;
-	srand(time(NULL));
-	spinAmount += 4*pi +(rand()) / (RAND_MAX / (2*pi*6 - 4*pi));
-	timerLive = true;
+	std::uniform_real_distribution<double> dist(5*M_PI, 7*M_PI);	
+	spinAmount +=dist(mt);
 	arrowSpun = true;
 	newGameButton.EnableWindow(false);
 	addButton.EnableWindow(false);
@@ -229,8 +210,10 @@ void CTwisterSpinnerView::OnNewGameButtonClicked()
 	while (listBox.GetCount() > 0) {
 		listBox.DeleteString(0);
 	}
-	spinAmount = (rand()) / (RAND_MAX / (2 * pi));
-	spinAngle = (rand()) / (RAND_MAX / (2 * pi));
+	std::uniform_real_distribution<double> dist(0, 2 * M_PI);
+	spinAmount = dist(mt);
+	spinAngle = dist(mt);
+	Invalidate();
 }
 void CTwisterSpinnerView::DisplayLimbAndColor() {
 	CString limbAndColor;
@@ -246,7 +229,7 @@ void CTwisterSpinnerView::DisplayLimbAndColor() {
 	else {
 		limbAndColor.Append(L"leg ");
 	}
-	double angleDeg = (spinAngle*180) / pi;
+	double angleDeg = (spinAngle*180) / M_PI;
 	while (angleDeg > 90) {
 		angleDeg -= 90;
 	}
@@ -294,7 +277,6 @@ void CTwisterSpinnerView::OnTimer(UINT_PTR TimerVal)
 			DisplayLimbAndColor();
 		}
 		KillTimer(timerVal);
-		timerLive = false;
 	}
 	spinButton.Invalidate();
 	Invalidate();
@@ -331,18 +313,14 @@ int CTwisterSpinnerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	srand(time(NULL));
-	spinAmount=(rand()) / (RAND_MAX / (2 * pi));
-	spinAngle = (rand()) / (RAND_MAX / (2 * pi));
+	spinAmount=(rand()) / (RAND_MAX / (2 * M_PI));
+	spinAngle = (rand()) / (RAND_MAX / (2 * M_PI));
 
 
-	spinButton.Create(_T("Spin!"), BS_PUSHBUTTON, CRect(300, 100, 400, 150),this,IDC_SPINBUTTON);
-	spinButton.ShowWindow(SW_SHOW);
-	addButton.Create(_T("Add player"), BS_PUSHBUTTON, CRect(300, 100, 400, 150), this, IDC_ADDBUTTON);
-	addButton.ShowWindow(SW_SHOW);
-	removeButton.Create(_T("Remove player"), BS_PUSHBUTTON, CRect(300, 100, 400, 150), this, IDC_REMOVEBUTTON);
-	removeButton.ShowWindow(SW_SHOW);
-	newGameButton.Create(_T("Start new game"), BS_PUSHBUTTON, CRect(300, 100, 400, 150), this, IDC_NEWGAMEBUTTON);
-	newGameButton.ShowWindow(SW_SHOW);
+	spinButton.Create(_T("Spin!"), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150),this,IDC_SPINBUTTON);
+	addButton.Create(_T("Add player"), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_ADDBUTTON);
+	removeButton.Create(_T("Remove player"), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_REMOVEBUTTON);
+	newGameButton.Create(_T("Start new game"), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_NEWGAMEBUTTON);
 
 	textBox.Create(WS_CHILD | WS_VISIBLE|WS_BORDER, CRect(100, 100, 200, 500), this, IDC_TEXTBOX);
 	listBox.Create(WS_CHILD | WS_VISIBLE|WS_BORDER,CRect(100,100,200,500),this,IDC_LISTBOX);
@@ -368,6 +346,18 @@ void CTwisterSpinnerView::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 BOOL CTwisterSpinnerView::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
 	if (message == WM_SIZE) {
+		CRect screen;
+		GetWindowRect(screen);
+		CPoint center = CPoint((screen.right - screen.left) / 2, (screen.bottom - screen.top) / 2);
+		GetDlgItem(IDC_SPINBUTTON)->MoveWindow(center.x - 50, center.y + r * 1.1, 100, 50);
+		GetDlgItem(IDC_NEWGAMEBUTTON)->MoveWindow(center.x + r + 50, center.y - 25, 150, 50);
+		if (!listBoxMoved) {
+			GetDlgItem(IDC_LISTBOX)->MoveWindow(center.x - r - 250, center.y - r, 220, 400, false);
+			listBoxMoved = true;
+		}
+		GetDlgItem(IDC_TEXTBOX)->MoveWindow(center.x - r - 250, center.y - r - 60, 220, 50);
+		GetDlgItem(IDC_ADDBUTTON)->MoveWindow(center.x - r - 250, center.y + r + 20, 100, 50);
+		GetDlgItem(IDC_REMOVEBUTTON)->MoveWindow(center.x - r - 140, center.y + r + 20, 110, 50);
 		listBoxMoved = false;
 	}
 
