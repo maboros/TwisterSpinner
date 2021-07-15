@@ -80,7 +80,7 @@ COLORREF giveColor(int i){
 }
 void CTwisterSpinnerView::OnDraw(CDC* pDC)
 {
-	//Init of variables
+	//Init of variables and dc
 
 	CRect screen;
 	GetWindowRect(screen);
@@ -142,9 +142,7 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 			CBrush coloredBrush(myCol);
 			dc.SelectObject(coloredBrush);
 			double x =(double)center.x+ cos(2.0 * (1.0+i) * M_PI / size)*r;
-			double y =(double)center.y+ sin(2.0 * (1.0+i) * M_PI / size)*r;
-			
-			
+			double y =(double)center.y+ sin(2.0 * (1.0+i) * M_PI / size)*r;	
 			dc.Pie(CRect(center.x-r,center.y-r,center.x+r,center.y+r), CPoint(x, y),previous);
 			previous=CPoint(x,y);
 		}
