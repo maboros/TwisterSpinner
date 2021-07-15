@@ -250,21 +250,6 @@ BOOL CMainFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle, CWnd* pParent
 	}
 
 
-	// enable customization button for all user toolbars
-	BOOL bNameValid;
-	CString strCustomize;
-	bNameValid = strCustomize.LoadString(IDS_TOOLBAR_CUSTOMIZE);
-	ASSERT(bNameValid);
-
-	for (int i = 0; i < iMaxUserToolbars; i ++)
-	{
-		CMFCToolBar* pUserToolbar = GetUserToolBarByIndex(i);
-		if (pUserToolbar != nullptr)
-		{
-			pUserToolbar->EnableCustomizeButton(TRUE, ID_VIEW_CUSTOMIZE, strCustomize);
-		}
-	}
-
 	return TRUE;
 }
 
@@ -278,8 +263,8 @@ void CMainFrame::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 	lpMMI->ptMinTrackSize.x =r*3;
 	lpMMI->ptMinTrackSize.y = r*2;
 	// Adjust the maximum height and width, if necessary
-	lpMMI->ptMaxTrackSize.x = r*3;
-	lpMMI->ptMaxTrackSize.y = r*2;
+	//lpMMI->ptMaxTrackSize.x = r*3;
+	//lpMMI->ptMaxTrackSize.y = r*2;
 
 
 	CFrameWndEx::OnGetMinMaxInfo(lpMMI);

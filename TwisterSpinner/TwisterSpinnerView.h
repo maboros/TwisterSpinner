@@ -31,9 +31,12 @@ protected:
 	double spinAmount;
 	double spinAngle = 0;
 	bool listBoxMoved = false;
+	bool gameStarted = false;
+	double r = 200;
+	int currentIndex = 0;
 public:
 	void Reset();
-	double r = 200;
+	
 
 // Implementation
 public:
@@ -44,7 +47,6 @@ public:
 #endif
 
 protected:
-	void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	void DrawWheel(CPoint previous, FlickerFreeDC::CMemDC dc, CPoint center);
 // Generated message map functions
 protected:

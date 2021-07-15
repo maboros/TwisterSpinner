@@ -41,6 +41,25 @@
 #define IDS_LEFT_LEG                    1003
 #define IDS_RIGHT_LEG                   1004
 #define IDS_ADD_NEW_PLAYER              1005
+#define IDS_WELCOME                     1006
+#define IDS_WINNER                      1007
+#define IDS_GRATS                       1008
+#define IDS_GAMEOVER                    1009
+#define IDS_NEWGAMEQ                    1010
+#define IDS_LEFT                        1011
+#define IDS_RIGHT                       1012
+#define IDS_HAND                        1013
+#define IDS_LEG                         1014
+#define IDS_BLUE                        1015
+#define IDS_RED                         1016
+#define IDS_GREEN                       1017
+#define IDS_YELLOW                      1018
+#define IDS_SPIN                        1019
+#define IDS_ADDPLAYER                   1020
+#define IDS_REMOVEPLAYER                1021
+#define IDS_STARTNEWGAMEB               1022
+#define IDS_SPUN                        1023
+#define IDS_TURN                        1024
 
 // Next default values for new objects
 // 
