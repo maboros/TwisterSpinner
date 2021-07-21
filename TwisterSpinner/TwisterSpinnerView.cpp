@@ -14,12 +14,13 @@
 #include "TwisterSpinnerView.h"
 #include "FlickerFree.h"
 #include "resource.h"
-#define M_PI   3.14159265358979323846264338327950288
-#include<random>
+//#define M_PI   3.14159265358979323846264338327950288
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 #include <string>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 
 // CTwisterSpinnerView
@@ -36,6 +37,7 @@ BEGIN_MESSAGE_MAP(CTwisterSpinnerView, CView)
 	ON_BN_CLICKED(IDC_NEWGAMEBUTTON, OnNewGameButtonClicked)
 	ON_WM_TIMER()
 	ON_WM_ERASEBKGND()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 // CTwisterSpinnerView construction/destruction
@@ -78,12 +80,18 @@ COLORREF giveColor(int i){
 		break;
 	}
 }
+CString CTwisterSpinnerView::fetchResString(int resId)
+{
+	CString str;
+	str.LoadString(resId);
+	return str;
+}
 void CTwisterSpinnerView::OnDraw(CDC* pDC)
 {
 	//Init of variables and dc
 
 	CRect screen;
-	GetWindowRect(screen);
+	GetClientRect(screen);
 	CPoint center = CPoint((screen.right - screen.left) / 2, (screen.bottom - screen.top) / 2);
 	CPoint previous = CPoint(center.x, center.y+r);
 	pDC->SetBkColor(RGB(200, 200, 200));
@@ -91,38 +99,30 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 
 	//Drawing labels
 
-	CString stringFetcher[7];
-	for (int i = 0; i < 7; ++i)
-	{
-		stringFetcher[i].LoadString(IDS_PLAYERSTRING+i);
-	}
 	CFont font;
-	int iHeight = -MulDiv(9, ::GetDeviceCaps(dc, LOGPIXELSY), 60);
-	int iWidth = -MulDiv(7, ::GetDeviceCaps(dc, LOGPIXELSX), 90);
-	font.CreateFont(iHeight, iWidth, 0, 0, FW_MEDIUM, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_MODERN, _T("Comic Sans"));
+	int iHeight = -MulDiv(9, ::GetDeviceCaps(dc, LOGPIXELSY), 72);
+	font.CreateFont(iHeight, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_MODERN, _T("Comic Sans"));
 	dc.SelectObject(&font);
-	dc.DrawText(stringFetcher[0], CRect(center.x - r - 320, center.y - r, center.x - r - 250, center.y - r + 20), DT_SINGLELINE | DT_LEFT);
-	dc.DrawText(stringFetcher[1], CRect(center.x - r-20, center.y - r, center.x - r + 50, center.x - r + 20), DT_SINGLELINE|DT_LEFT);
-	dc.DrawText(stringFetcher[2], CRect(center.x + r - 20, center.y - r, center.x + r + 50, center.x - r + 20), DT_SINGLELINE | DT_LEFT);
-	dc.DrawText(stringFetcher[3], CRect(center.x - r - 20, center.y + r, center.x - r + 50, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
-	dc.DrawText(stringFetcher[4], CRect(center.x + r - 20, center.y + r, center.x + r + 50, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
-	dc.DrawText(stringFetcher[5], CRect(center.x - r - 370, center.y - r - 60, center.x - r - 250, center.y - r - 40), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(fetchResString(IDS_PLAYERSTRING), CRect(center.x - r - 320, center.y - r, center.x - r - 200, center.y - r + 20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(fetchResString(IDS_PLAYERSTRING+1), CRect(center.x - r-20, center.y - r, center.x - r + 150, center.x - r + 20), DT_SINGLELINE|DT_LEFT);
+	dc.DrawText(fetchResString(IDS_PLAYERSTRING+2), CRect(center.x + r - 20, center.y - r, center.x + r + 150, center.x - r + 20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(fetchResString(IDS_PLAYERSTRING+3), CRect(center.x - r - 20, center.y + r, center.x - r + 150, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(fetchResString(IDS_PLAYERSTRING+4), CRect(center.x + r - 20, center.y + r, center.x + r + 150, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(fetchResString(IDS_PLAYERSTRING+5), CRect(center.x - r - 380, center.y - r - 60, center.x - r - 250, center.y - r - 40), DT_SINGLELINE | DT_LEFT);
 	if (gameStarted) {
 		if (currentIndex == listBox.GetCount()) {
 			currentIndex = 0;
 		}
 		CString playerTurn;
 		listBox.GetText(currentIndex,playerTurn);
-		CString turn;
-		turn.LoadString(IDS_TURN);
-		playerTurn.Append(turn);
+		playerTurn.Append(fetchResString(IDS_TURN));
 		dc.DrawText(playerTurn, CRect(center.x - 200, center.y - r - 30, center.x + 200, center.x - r - 10), DT_SINGLELINE | DT_CENTER);
 	}
 	CFont fontBig;
 	iHeight = -MulDiv(18, ::GetDeviceCaps(dc, LOGPIXELSY), 72);
 	fontBig.CreateFont(iHeight,0,0,0,FW_SEMIBOLD,FALSE,FALSE,0,ANSI_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH | FF_MODERN,_T("Comic Sans"));
 	dc.SelectObject(&fontBig);
-	dc.DrawText(stringFetcher[6], CRect(center.x - 200, center.y - r - 70, center.x + 200, center.x - r - 50), DT_SINGLELINE | DT_CENTER);
+	dc.DrawText(fetchResString(IDS_PLAYERSTRING+6), CRect(center.x - 200, center.y - r - 70, center.x + 200, center.x - r - 50), DT_SINGLELINE | DT_CENTER);
 
 	//Drawing the wheel
 
@@ -172,14 +172,15 @@ void CTwisterSpinnerView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 #endif
 }
 
-	std::random_device rd;
-	std::mt19937 mt(rd());
+	
 void CTwisterSpinnerView::OnSpinButtonClicked()
 {
+	std::random_device rd;
+	std::mt19937 mt(rd());
 	timerVal = SetTimer(IDT_TIMER_0, 1, NULL);
 	if (timerVal == 0)
 	{
-		MessageBox(L"Timer failed to initialize", L"IDT_TIMER_0", MB_OK | MB_SYSTEMMODAL);
+		MessageBox(fetchResString(IDS_TIMERMSG), fetchResString(IDS_TIMERFAIL), MB_OK | MB_SYSTEMMODAL);
 	}
 	while (spinAngle > 2*M_PI) {
 		spinAmount -= 2 * M_PI;
@@ -197,11 +198,11 @@ void CTwisterSpinnerView::OnSpinButtonClicked()
 void CTwisterSpinnerView::OnAddButtonClicked()
 {
 	CString name;
-	textBox.GetWindowTextW(name);
+	textBox.GetWindowText(name);
 	if (name.IsEmpty()) {
 		return;
 	}
-	textBox.SetWindowTextW(L"");
+	textBox.SetWindowText(L"");
 	listBox.AddString(name);
 	removeButton.EnableWindow(true);
 }
@@ -215,24 +216,22 @@ void CTwisterSpinnerView::OnRemoveButtonClicked()
 	if (listBox.GetCount() == 1&&gameStarted) {
 		CString winner;
 		listBox.GetText(0, winner);
-		CString stringFetcher;
-		stringFetcher.LoadString(IDS_WINNER);
-		winner.Append(stringFetcher);
-		stringFetcher.LoadString(IDS_GRATS);
-		MessageBox(winner, stringFetcher, MB_OK);
+		winner.Append(fetchResString(IDS_WINNER));
+		MessageBox(winner, fetchResString(IDS_GRATS), MB_OK);
 		Reset();
+	}
+	if (listBox.GetCount() == 0) {
+		removeButton.EnableWindow(false);
 	}
 	Invalidate();
 }
 void CTwisterSpinnerView::OnNewGameButtonClicked()
 {
+	std::random_device rd;
+	std::mt19937 mt(rd());
 	if (gameStarted)
 	{
-		CString stringFetcher;
-		stringFetcher.LoadString(IDS_GAMEOVER);
-		CString stringFetcher2;
-		stringFetcher2.LoadString(IDS_NEWGAMEQ);
-		if (MessageBox(stringFetcher2,stringFetcher, MB_YESNO) == IDYES)
+		if (MessageBox(fetchResString(IDS_NEWGAMEQ), fetchResString(IDS_GAMEOVER), MB_YESNO) == IDYES)
 		{
 			while (listBox.GetCount() > 0) {
 				listBox.DeleteString(0);
@@ -259,51 +258,41 @@ void CTwisterSpinnerView::OnNewGameButtonClicked()
 	
 }
 void CTwisterSpinnerView::DisplayLimbAndColor() {
-	CString limbAndColor; 
-	CString stringFetcher;
-	
+	CString limbAndColor;
+	double halfCircle = 180;
 	if (cos(spinAngle) < 0) {
-		stringFetcher.LoadString(IDS_LEFT);
-		limbAndColor.Append(stringFetcher);
+		limbAndColor.Append(fetchResString(IDS_LEFT));
 	}
 	else {
-		stringFetcher.LoadString(IDS_RIGHT);
-		limbAndColor.Append(stringFetcher);
+		limbAndColor.Append(fetchResString(IDS_RIGHT));
 	}
 	if (sin(spinAngle) <= 0) {
-		stringFetcher.LoadString(IDS_HAND);
-		limbAndColor.Append(stringFetcher);
+		limbAndColor.Append(fetchResString(IDS_HAND));
 	}
 	else {
-		stringFetcher.LoadString(IDS_LEG);
-		limbAndColor.Append(stringFetcher);
+		limbAndColor.Append(fetchResString(IDS_LEG));
 	}
-	double angleDeg = (spinAngle*180) / M_PI;
-	while (angleDeg > 90) {
-		angleDeg -= 90;
+	double angleDeg = (spinAngle* halfCircle) / M_PI;
+	while (angleDeg > halfCircle/2) {
+		angleDeg -= halfCircle/2;
 	}
-	if (angleDeg >= 3 * 22.5)
+	if (angleDeg >= 3 * halfCircle/8)
 	{
-		stringFetcher.LoadString(IDS_YELLOW);
-		limbAndColor.Append(stringFetcher);
+		limbAndColor.Append(fetchResString(IDS_YELLOW));
 	}
-	else if (angleDeg >= 2 * 22.5)
+	else if (angleDeg >= 2 * halfCircle/8)
 	{
-		stringFetcher.LoadString(IDS_BLUE);
-		limbAndColor.Append(stringFetcher);
+		limbAndColor.Append(fetchResString(IDS_BLUE));
 	}
-	else if (angleDeg >= 22.5)
+	else if (angleDeg >= halfCircle/8)
 	{
-		stringFetcher.LoadString(IDS_GREEN);
-		limbAndColor.Append(stringFetcher);
+		limbAndColor.Append(fetchResString(IDS_GREEN));
 	}
 	else
 	{
-		stringFetcher.LoadString(IDS_RED);
-		limbAndColor.Append(stringFetcher);
+		limbAndColor.Append(fetchResString(IDS_RED));
 	}
-	stringFetcher.LoadString(IDS_SPUN);
-	MessageBox((LPCTSTR)limbAndColor, stringFetcher, MB_OK);
+	MessageBox(limbAndColor, fetchResString(IDS_SPUN), MB_OK);
 	currentIndex += 1;
 	arrowSpun = false;
 	newGameButton.EnableWindow(true);
@@ -313,17 +302,19 @@ void CTwisterSpinnerView::DisplayLimbAndColor() {
 }
 void CTwisterSpinnerView::OnTimer(UINT_PTR TimerVal)
 {
-	if (spinAngle /spinAmount < 0.66&&spinAngle/spinAmount>0.33)
+	double angleIncr = 0.025;
+	double third = 1.0 / 3.0;
+	if (spinAngle /spinAmount < 2*third&&spinAngle/spinAmount>third)
 	{
-		spinAngle += 0.05;
+		spinAngle += angleIncr*2;
 	}
-	else if (spinAngle / spinAmount < 0.33)
+	else if (spinAngle / spinAmount < third)
 	{
-		spinAngle += 0.1;
+		spinAngle += angleIncr*4;
 	}
 	else 
 	{
-		spinAngle += 0.025;
+		spinAngle += angleIncr;
 	}
 	if (spinAngle > spinAmount)
 	{
@@ -366,21 +357,16 @@ int CTwisterSpinnerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	spinAmount=(rand()) / (RAND_MAX / (2 * M_PI));
 	spinAngle = (rand()) / (RAND_MAX / (2 * M_PI));
 
-	CString stringFetcher;
 
-	stringFetcher.LoadString(IDS_SPIN);
-	spinButton.Create(stringFetcher, BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150),this,IDC_SPINBUTTON);
+	spinButton.Create(fetchResString(IDS_SPIN), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150),this,IDC_SPINBUTTON);
 	spinButton.EnableWindow(false);
 
-	stringFetcher.LoadString(IDS_ADDPLAYER);
-	addButton.Create(stringFetcher, BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_ADDBUTTON);
+	addButton.Create(fetchResString(IDS_ADDPLAYER), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_ADDBUTTON);
 	
-	stringFetcher.LoadString(IDS_REMOVEPLAYER);
-	removeButton.Create(stringFetcher, BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_REMOVEBUTTON);
+	removeButton.Create(fetchResString(IDS_REMOVEPLAYER), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_REMOVEBUTTON);
 	removeButton.EnableWindow(false);
 	
-	stringFetcher.LoadString(IDS_STARTNEWGAMEB);
-	newGameButton.Create(stringFetcher, BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_NEWGAMEBUTTON);
+	newGameButton.Create(fetchResString(IDS_STARTNEWGAMEB), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_NEWGAMEBUTTON);
 
 	textBox.Create(WS_CHILD | WS_VISIBLE|WS_BORDER, CRect(100, 100, 200, 500), this, IDC_TEXTBOX);
 	listBox.Create(WS_CHILD | WS_VISIBLE|WS_BORDER,CRect(100,100,200,500),this,IDC_LISTBOX);
@@ -394,23 +380,22 @@ BOOL CTwisterSpinnerView::OnEraseBkgnd(CDC* pDC)
 }
 
 
-BOOL CTwisterSpinnerView::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+void CTwisterSpinnerView::OnSize(UINT nType, int cx, int cy)
 {
-	if (message == WM_SIZE) {
-		CRect screen;
-		GetWindowRect(screen);
-		CPoint center = CPoint((screen.right - screen.left) / 2, (screen.bottom - screen.top) / 2);
-		GetDlgItem(IDC_SPINBUTTON)->MoveWindow(center.x - 50, center.y + r * 1.1, 100, 50);
-		GetDlgItem(IDC_NEWGAMEBUTTON)->MoveWindow(center.x + r + 50, center.y - 25, 150, 50);
-		if (!listBoxMoved) {
-			GetDlgItem(IDC_LISTBOX)->MoveWindow(center.x - r - 250, center.y - r, 220, 400, false);
-			listBoxMoved = true;
-		}
-		GetDlgItem(IDC_TEXTBOX)->MoveWindow(center.x - r - 250, center.y - r - 60, 220, 50);
-		GetDlgItem(IDC_ADDBUTTON)->MoveWindow(center.x - r - 250, center.y + r + 20, 100, 50);
-		GetDlgItem(IDC_REMOVEBUTTON)->MoveWindow(center.x - r - 140, center.y + r + 20, 110, 50);
-		listBoxMoved = false;
-	}
 
-	return CView::OnWndMsg(message, wParam, lParam, pResult);
+	CRect screen;
+	GetClientRect(screen);
+	CPoint center = CPoint((screen.right - screen.left) / 2, (screen.bottom - screen.top) / 2);
+	GetDlgItem(IDC_SPINBUTTON)->MoveWindow(center.x - 50, center.y + r * 1.1, 100, 50);
+	GetDlgItem(IDC_NEWGAMEBUTTON)->MoveWindow(center.x + r + 50, center.y - 25, 150, 50);
+	if (!listBoxMoved) {
+		GetDlgItem(IDC_LISTBOX)->MoveWindow(center.x - r - 250, center.y - r, 220, 400, false);
+		listBoxMoved = true;
+	}
+	GetDlgItem(IDC_TEXTBOX)->MoveWindow(center.x - r - 250, center.y - r - 60, 220, 50);
+	GetDlgItem(IDC_ADDBUTTON)->MoveWindow(center.x - r - 250, center.y + r + 20, 110, 50);
+	GetDlgItem(IDC_REMOVEBUTTON)->MoveWindow(center.x - r - 140, center.y + r + 20, 110, 50);
+	listBoxMoved = false;
+
+	CView::OnSize(nType, cx, cy);
 }

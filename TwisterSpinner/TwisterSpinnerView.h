@@ -47,7 +47,7 @@ public:
 #endif
 
 protected:
-	void DrawWheel(CPoint previous, FlickerFreeDC::CMemDC dc, CPoint center);
+	CString fetchResString(int resId);
 // Generated message map functions
 protected:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
@@ -68,7 +68,7 @@ private:
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 
 #ifndef _DEBUG  // debug version in TwisterSpinnerView.cpp

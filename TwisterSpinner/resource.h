@@ -60,6 +60,8 @@
 #define IDS_STARTNEWGAMEB               1022
 #define IDS_SPUN                        1023
 #define IDS_TURN                        1024
+#define IDS_TIMERFAIL                   2000
+#define IDS_TIMERMSG                    2001
 
 // Next default values for new objects
 // 
