@@ -101,14 +101,14 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 
 	CFont font;
 	int iHeight = -MulDiv(9, ::GetDeviceCaps(dc, LOGPIXELSY), 72);
-	font.CreateFont(iHeight, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_MODERN, _T("Comic Sans"));
+	font.CreateFont(iHeight, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_MODERN, _T("Comic Sans MS"));
 	dc.SelectObject(&font);
-	dc.DrawText(fetchResString(IDS_PLAYERSTRING), CRect(center.x - r - 320, center.y - r, center.x - r - 200, center.y - r + 20), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(fetchResString(IDS_PLAYERSTRING), CRect(0, center.y - r, center.x - r - 250, center.y - r + 20), DT_SINGLELINE | DT_RIGHT);
 	dc.DrawText(fetchResString(IDS_PLAYERSTRING+1), CRect(center.x - r-20, center.y - r, center.x - r + 150, center.x - r + 20), DT_SINGLELINE|DT_LEFT);
 	dc.DrawText(fetchResString(IDS_PLAYERSTRING+2), CRect(center.x + r - 20, center.y - r, center.x + r + 150, center.x - r + 20), DT_SINGLELINE | DT_LEFT);
 	dc.DrawText(fetchResString(IDS_PLAYERSTRING+3), CRect(center.x - r - 20, center.y + r, center.x - r + 150, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
 	dc.DrawText(fetchResString(IDS_PLAYERSTRING+4), CRect(center.x + r - 20, center.y + r, center.x + r + 150, center.x + r + 20), DT_SINGLELINE | DT_LEFT);
-	dc.DrawText(fetchResString(IDS_PLAYERSTRING+5), CRect(center.x - r - 380, center.y - r - 60, center.x - r - 250, center.y - r - 40), DT_SINGLELINE | DT_LEFT);
+	dc.DrawText(fetchResString(IDS_PLAYERSTRING+5), CRect(0, center.y - r - 60, center.x - r - 250, center.y - r - 40), DT_SINGLELINE | DT_RIGHT);
 	if (gameStarted) {
 		if (currentIndex == listBox.GetCount()) {
 			currentIndex = 0;
@@ -120,9 +120,9 @@ void CTwisterSpinnerView::OnDraw(CDC* pDC)
 	}
 	CFont fontBig;
 	iHeight = -MulDiv(18, ::GetDeviceCaps(dc, LOGPIXELSY), 72);
-	fontBig.CreateFont(iHeight,0,0,0,FW_SEMIBOLD,FALSE,FALSE,0,ANSI_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH | FF_MODERN,_T("Comic Sans"));
+	fontBig.CreateFont(iHeight,0,0,0,FW_SEMIBOLD,FALSE,FALSE,0,ANSI_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH | FF_MODERN,_T("Comic Sans MS"));
 	dc.SelectObject(&fontBig);
-	dc.DrawText(fetchResString(IDS_PLAYERSTRING+6), CRect(center.x - 200, center.y - r - 70, center.x + 200, center.x - r - 50), DT_SINGLELINE | DT_CENTER);
+	dc.DrawText(fetchResString(IDS_PLAYERSTRING+6), CRect(0, center.y - r - 70, center.x *2, center.y - r ), DT_SINGLELINE | DT_CENTER);
 
 	//Drawing the wheel
 
@@ -357,19 +357,28 @@ int CTwisterSpinnerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	spinAmount=(rand()) / (RAND_MAX / (2 * M_PI));
 	spinAngle = (rand()) / (RAND_MAX / (2 * M_PI));
 
+	//HGDIOBJ font = GetStockObject(DEFAULT_GUI_FONT);
+	int iHeight = -MulDiv(9, ::GetDeviceCaps((HDC)GetDC(), LOGPIXELSY), 72);
+	HFONT font=CreateFont(iHeight, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_MODERN, _T("Comic Sans MS"));
+
 
 	spinButton.Create(fetchResString(IDS_SPIN), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150),this,IDC_SPINBUTTON);
 	spinButton.EnableWindow(false);
+	spinButton.SendMessage(WM_SETFONT, (WPARAM)font, true);
 
 	addButton.Create(fetchResString(IDS_ADDPLAYER), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_ADDBUTTON);
-	
+	addButton.SendMessage(WM_SETFONT, (WPARAM)font, true);
+
 	removeButton.Create(fetchResString(IDS_REMOVEPLAYER), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_REMOVEBUTTON);
 	removeButton.EnableWindow(false);
-	
+	removeButton.SendMessage(WM_SETFONT, (WPARAM)font, true);
+
 	newGameButton.Create(fetchResString(IDS_STARTNEWGAMEB), BS_PUSHBUTTON | WS_VISIBLE, CRect(300, 100, 400, 150), this, IDC_NEWGAMEBUTTON);
+	newGameButton.SendMessage(WM_SETFONT, (WPARAM)font, true);
 
 	textBox.Create(WS_CHILD | WS_VISIBLE|WS_BORDER, CRect(100, 100, 200, 500), this, IDC_TEXTBOX);
 	listBox.Create(WS_CHILD | WS_VISIBLE|WS_BORDER,CRect(100,100,200,500),this,IDC_LISTBOX);
+
 	return 0;
 }
 
